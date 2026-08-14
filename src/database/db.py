@@ -1,5 +1,15 @@
-from src.database.config import supabase
+import streamlit as st
+from src.database.config import supabase, _init_error
 import bcrypt
+
+
+def _check_client():
+    """Raise a clean error if Supabase client failed to initialize."""
+    if supabase is None:
+        msg = _init_error or "Supabase client not initialized. Check your secrets."
+        st.error(f"🔴 Database connection error: {msg}")
+        st.stop()
+
 
 
 def hash_pass(pwd):
