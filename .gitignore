@@ -12,6 +12,9 @@ venv/
 env/
 ENV/
 
+# Scratch & temporary test scripts
+scratch/
+
 # Distribution / packaging
 .dist/
 build/
