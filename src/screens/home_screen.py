@@ -9,34 +9,42 @@ def home_screen():
     style_background_home()
     style_base_layout()
 
-    st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
 
     col1, col2 = st.columns(2, gap="large")
 
     with col1:
-        st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-        st.markdown("<h2 style='text-align: center; color: #1E1B4B; margin-bottom: 8px;'>I'm a Student</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: #475569; font-size: 0.95rem; margin-bottom: 20px;'>Check your attendance records, join courses via QR, or log in with FaceID.</p>", unsafe_allow_html=True)
-        c_img1, c_img2, c_img3 = st.columns([1, 2, 1])
-        with c_img2:
-            st.image("https://i.ibb.co/844D9Lrt/mascot-student.png", width=120)
-        st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
-        if st.button('Enter Student Portal', type='primary', icon=':material/arrow_outward:', icon_position='right', width='stretch'):
+        st.markdown("""
+            <div style="text-align: center;">
+                <h2 style="text-align: center; color: #0F172A; margin: 0 0 8px 0; font-size: 1.65rem;">I'm a Student</h2>
+                <p style="text-align: center; color: #64748B; font-size: 0.95rem; margin-bottom: 24px; min-height: 48px; line-height: 1.4;">
+                    Check your attendance records, join courses via QR, or log in with FaceID.
+                </p>
+                <div style="display: flex; justify-content: center; align-items: center; height: 140px; margin-bottom: 24px;">
+                    <img src="https://i.ibb.co/844D9Lrt/mascot-student.png" style="height: 120px; object-fit: contain; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.08));" />
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+        if st.button('Enter Student Portal →', type='primary', width='stretch', key='home_student_btn'):
             st.session_state['login_type'] = 'student'
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
 
     with col2:
-        st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-        st.markdown("<h2 style='text-align: center; color: #1E1B4B; margin-bottom: 8px;'>I'm a Teacher</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: #475569; font-size: 0.95rem; margin-bottom: 20px;'>Manage your courses, share join links, and take multi-face or voice attendance.</p>", unsafe_allow_html=True)
-        c_img1, c_img2, c_img3 = st.columns([1, 2, 1])
-        with c_img2:
-            st.image("https://i.ibb.co/CsmQQV6X/mascot-prof.png", width=135)
-        st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
-        if st.button('Enter Teacher Portal', type='primary', icon=':material/arrow_outward:', icon_position='right', width='stretch'):
+        st.markdown("""
+            <div style="text-align: center;">
+                <h2 style="text-align: center; color: #0F172A; margin: 0 0 8px 0; font-size: 1.65rem;">I'm a Teacher</h2>
+                <p style="text-align: center; color: #64748B; font-size: 0.95rem; margin-bottom: 24px; min-height: 48px; line-height: 1.4;">
+                    Manage your courses, share join links, and take multi-face or voice attendance.
+                </p>
+                <div style="display: flex; justify-content: center; align-items: center; height: 140px; margin-bottom: 24px;">
+                    <img src="https://i.ibb.co/CsmQQV6X/mascot-prof.png" style="height: 130px; object-fit: contain; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.08));" />
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+        if st.button('Enter Teacher Portal →', type='primary', width='stretch', key='home_teacher_btn'):
             st.session_state['login_type'] = 'teacher'
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
 
     footer_home()

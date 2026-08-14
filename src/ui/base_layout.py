@@ -9,19 +9,19 @@ def style_background_home():
                 background-attachment: fixed !important;
             }
 
-            .stApp div[data-testid="stColumn"] {
-                background: rgba(255, 255, 255, 0.92) !important;
-                backdrop-filter: blur(16px) !important;
-                padding: 2.5rem !important;
-                border-radius: 2rem !important;
+            /* Home Portal Cards */
+            .stApp [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
+                background: #FFFFFF !important;
+                padding: 2.75rem 2.25rem !important;
+                border-radius: 1.75rem !important;
                 border: 1px solid rgba(255, 255, 255, 0.4) !important;
-                box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3) !important;
-                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease !important;
+                box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.35) !important;
+                transition: transform 0.25s ease, box-shadow 0.25s ease !important;
             }
 
-            .stApp div[data-testid="stColumn"]:hover {
+            .stApp [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:hover {
                 transform: translateY(-4px) !important;
-                box-shadow: 0 25px 50px -12px rgba(88, 101, 242, 0.35) !important;
+                box-shadow: 0 25px 50px -12px rgba(88, 101, 242, 0.4) !important;
             }
         </style>
     """, unsafe_allow_html=True)
@@ -60,7 +60,7 @@ def style_base_layout():
             .block-container {
                 padding-top: 1.5rem !important;
                 padding-bottom: 2rem !important;
-                max-width: 1100px !important;
+                max-width: 1050px !important;
             }
 
             h1 {
@@ -74,7 +74,7 @@ def style_base_layout():
             h2 {
                 font-family: 'Outfit', sans-serif !important;
                 font-weight: 700 !important;
-                font-size: 1.85rem !important;
+                font-size: 1.75rem !important;
                 line-height: 1.2 !important;
                 margin-bottom: 0.5rem !important;
                 color: #0F172A !important;
@@ -97,8 +97,8 @@ def style_base_layout():
                 border-radius: 0.875rem !important;
                 font-family: 'Inter', sans-serif !important;
                 font-weight: 600 !important;
-                font-size: 0.925rem !important;
-                padding: 8px 18px !important;
+                font-size: 0.95rem !important;
+                padding: 10px 20px !important;
                 border: 1px solid transparent !important;
                 transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
             }
@@ -157,19 +157,6 @@ def style_base_layout():
                 border-radius: 1rem !important;
                 overflow: hidden !important;
                 border: 1px solid #E2E8F0 !important;
-            }
-
-            /* Pill badges */
-            .bento-badge {
-                display: inline-flex;
-                align-items: center;
-                gap: 4px;
-                padding: 4px 10px;
-                border-radius: 8px;
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 0.78rem;
-                font-weight: 600;
-                letter-spacing: 0.02em;
             }
         </style>
     """, unsafe_allow_html=True)
