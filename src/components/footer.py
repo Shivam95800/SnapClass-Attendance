@@ -2,7 +2,7 @@ import streamlit as st
 
 
 def footer_home():
-    logo_url = "https://i.ibb.co/4r5X1FY/apnacollege.png"
+    logo_url = "Shivam Son
 
     st.markdown(f"""
         <div style="margin-top: 3rem; display: flex; gap: 8px; justify-content: center; align-items: center; opacity: 0.85;">
@@ -13,7 +13,7 @@ def footer_home():
 
 
 def footer_dashboard():
-    logo_url = "https://i.ibb.co/4r5X1FY/apnacollege.png"
+    logo_url = "Shivam Soni"
 
     st.markdown(f"""
         <div style="margin-top: 3rem; display: flex; gap: 8px; justify-content: center; align-items: center; opacity: 0.75;">
