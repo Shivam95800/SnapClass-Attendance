@@ -152,9 +152,35 @@ def style_base_layout():
                 border-color: #94A3B8 !important;
             }
 
-            /* Inputs & Selectbox */
-            div[data-baseweb="input"], div[data-baseweb="select"] {
+            /* ===== INPUT FIELD FIXES ===== */
+            /* Labels */
+            label, div[data-testid="stWidgetLabel"] p,
+            div[data-testid="stWidgetLabel"] span {
+                color: #334155 !important;
+                font-weight: 500 !important;
+                font-size: 0.9rem !important;
+            }
+
+            /* Input containers — force light background */
+            div[data-baseweb="input"], div[data-baseweb="select"],
+            div[data-baseweb="textarea"] {
                 border-radius: 0.75rem !important;
+                background: #F8FAFC !important;
+                border: 1.5px solid #E2E8F0 !important;
+            }
+
+            /* Actual input text */
+            div[data-baseweb="input"] input,
+            div[data-baseweb="select"] input,
+            textarea {
+                background: #F8FAFC !important;
+                color: #0F172A !important;
+                caret-color: #5865F2 !important;
+            }
+
+            /* Select value text */
+            div[data-baseweb="select"] [data-testid="stSelectboxValue"] {
+                color: #0F172A !important;
             }
 
             /* Dialog Styling */
