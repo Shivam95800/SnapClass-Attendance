@@ -102,7 +102,7 @@ def teacher_tab_take_attendance():
 
     # Subject selection card
     with st.container(border=True):
-        st.markdown("<h3 style='margin-top: 0;'>1. Select Course & Upload Photos</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='margin-top: 0;'>1. Select Course &amp; Upload Photos</h3>", unsafe_allow_html=True)
         col1, col2 = st.columns([3, 1], vertical_alignment='bottom')
 
         with col1:
@@ -189,7 +189,7 @@ def teacher_tab_manage_subjects():
 
     header_c1, header_c2 = st.columns([3, 1], vertical_alignment='center')
     with header_c1:
-        st.markdown("<h2 style='margin: 0;'>Your Courses & Sections</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='margin: 0;'>Your Courses &amp; Sections</h2>", unsafe_allow_html=True)
     with header_c2:
         if st.button('＋ Create Subject', type='primary', width='stretch'):
             create_subject_dialog(teacher_id)
@@ -291,27 +291,31 @@ def teacher_screen_login():
     st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
 
     with st.container(border=True):
-        st.markdown("<h2 style='text-align: center; margin: 0 0 1rem 0;'>Teacher Portal Login</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: center; margin: 0 0 1rem 0; color: #0F172A;'>Teacher Portal Login</h2>", unsafe_allow_html=True)
 
-        teacher_username = st.text_input("Username", placeholder='e.g. ananyaroy')
-        teacher_pass = st.text_input("Password", type='password', placeholder="Enter your password")
+        with st.form("teacher_login_form"):
+            teacher_username = st.text_input("Username", placeholder='e.g. ananyaroy')
+            teacher_pass = st.text_input("Password", type='password', placeholder="Enter your password")
 
-        st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
-        btnc1, btnc2 = st.columns(2)
+            st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
+            btnc1, btnc2 = st.columns(2)
 
-        with btnc1:
-            if st.button('Login', icon=':material/login:', width='stretch', type='primary'):
-                if login_teacher(teacher_username, teacher_pass):
-                    st.toast("Welcome back!", icon="👋")
-                    time.sleep(0.5)
-                    st.rerun()
-                else:
-                    st.error("Invalid username or password.")
+            with btnc1:
+                submitted = st.form_submit_button('Login', use_container_width=True, type='primary')
+            with btnc2:
+                go_register = st.form_submit_button('Create Account', use_container_width=True)
 
-        with btnc2:
-            if st.button('Create Account', type="tertiary", width='stretch'):
-                st.session_state.teacher_login_type = 'register'
+        if submitted:
+            if login_teacher(teacher_username, teacher_pass):
+                st.toast("Welcome back!", icon="👋")
+                time.sleep(0.5)
                 st.rerun()
+            else:
+                st.error("Invalid username or password.")
+
+        if go_register:
+            st.session_state.teacher_login_type = 'register'
+            st.rerun()
 
     footer_dashboard()
 
@@ -343,30 +347,34 @@ def teacher_screen_register():
     st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
 
     with st.container(border=True):
-        st.markdown("<h2 style='text-align: center; margin: 0 0 1rem 0;'>Register Teacher Profile</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: center; margin: 0 0 1rem 0; color: #0F172A;'>Register Teacher Profile</h2>", unsafe_allow_html=True)
 
-        teacher_name = st.text_input("Full Name", placeholder='e.g. Dr. Ananya Roy')
-        teacher_username = st.text_input("Username", placeholder='e.g. ananyaroy')
-        teacher_pass = st.text_input("Password", type='password', placeholder="Choose password")
-        teacher_pass_confirm = st.text_input("Confirm Password", type='password', placeholder="Re-enter password")
+        with st.form("teacher_register_form"):
+            teacher_name = st.text_input("Full Name", placeholder='e.g. Dr. Ananya Roy')
+            teacher_username = st.text_input("Username", placeholder='e.g. ananyaroy')
+            teacher_pass = st.text_input("Password", type='password', placeholder="Choose a strong password")
+            teacher_pass_confirm = st.text_input("Confirm Password", type='password', placeholder="Re-enter your password")
 
-        st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
-        btnc1, btnc2 = st.columns(2)
+            st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
+            btnc1, btnc2 = st.columns(2)
 
-        with btnc1:
-            if st.button('Register Account', width='stretch', type='primary'):
-                success, message = register_teacher(teacher_username, teacher_name, teacher_pass, teacher_pass_confirm)
-                if success:
-                    st.success(message)
-                    time.sleep(1.5)
-                    st.session_state.teacher_login_type = "login"
-                    st.rerun()
-                else:
-                    st.error(message)
+            with btnc1:
+                submitted = st.form_submit_button('Register Account', use_container_width=True, type='primary')
+            with btnc2:
+                go_login = st.form_submit_button('Login Instead', use_container_width=True)
 
-        with btnc2:
-            if st.button('Login Instead', type="tertiary", width='stretch'):
-                st.session_state.teacher_login_type = 'login'
+        if submitted:
+            success, message = register_teacher(teacher_username, teacher_name, teacher_pass, teacher_pass_confirm)
+            if success:
+                st.success(message)
+                time.sleep(1.5)
+                st.session_state.teacher_login_type = "login"
                 st.rerun()
+            else:
+                st.error(message)
+
+        if go_login:
+            st.session_state.teacher_login_type = 'login'
+            st.rerun()
 
     footer_dashboard()
