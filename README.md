@@ -4,7 +4,7 @@
 
   # SnapClass — AI-Powered Smart Attendance System
   
-  > **Multi-Modal AI Attendance Platform leveraging Deep Facial Embeddings & Voice Biometrics for Instant Classroom Roll-Call**
+  > **Multi-Modal AI Attendance Platform leveraging Deep Facial Embeddings & Voice Biometrics for Instant Classroom Roll-Call with a Linear & Cron-Inspired Bento-Grid Interface**
 
   [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
   [![Streamlit](https://img.shields.io/badge/Streamlit-1.40%2B-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
@@ -26,7 +26,8 @@ Traditional classroom attendance methods—such as manual name roll-calls or pap
 **SnapClass** modernizes educational attendance tracking through an intelligent, **dual-modality biometric platform**:
 1. **📸 Computer Vision Pipeline**: Teachers capture or upload a single classroom snapshot. The system automatically detects every student, extracts 128-dimensional facial embeddings, classifies them with a trained SVM model, verifies distance thresholds, and marks attendance in seconds.
 2. **🎙️ Voice Biometrics Pipeline**: For audio-based attendance, the teacher records a continuous classroom roll-call. The pipeline splits audio into individual speaker segments using spectral analysis, calculates deep voiceprints via `Resemblyzer`, and matches each voice against registered student voice embeddings.
-3. **📲 Effortless Enrollment**: Subject join links and dynamically generated QR codes allow students to register and auto-enroll into courses in one click.
+3. **🎨 Linear & Cron Inspired UX**: High-density Bento-Grid course cards, floating segmented pill tab switchers, monospace code badges (`JetBrains Mono`), and glassmorphism styling for a responsive, modern interface.
+4. **📲 Effortless Enrollment**: Subject join links and dynamically generated QR codes allow students to register and auto-enroll into courses in one click.
 
 ---
 
@@ -77,6 +78,17 @@ flowchart TD
 
 ---
 
+## 🎨 Design System & UI Highlights
+
+Inspired by **[Linear](https://linear.app)** and **[Cron](https://cron.com)**, SnapClass features a high-density, product-first aesthetic:
+
+- **🍱 Bento-Grid Cards**: Course cards with structured hierarchy, section chips, code badges (`JetBrains Mono`), and high-density stats chips (`👥 Enrolled`, `📅 Sessions`, `📈 Rate`).
+- **💊 Segmented Pill Navigation**: Instant tab switcher between *Take Attendance*, *Manage Subjects*, and *Attendance Records* without layout shift.
+- **🖼️ Photo Filmstrip**: Gallery cards for classroom snapshots with thumbnail previews and live face-detection status.
+- **✨ Micro-Interactions**: Smooth hover lifts (`translateY(-2px)`), glassmorphic backdrops (`backdrop-filter: blur(16px)`), and tailored color themes.
+
+---
+
 ## ✨ Key Features
 
 | Feature | Description | Technology Stack |
@@ -84,8 +96,9 @@ flowchart TD
 | **📸 Multi-Face Classroom Analysis** | Detects multiple student faces from a single group photo or webcam snapshot, computes 128D facial descriptors, and automatically logs verified students. | `dlib`, `face_recognition_models`, `scikit-learn` |
 | **🎙️ Voiceprint Speaker Verification** | Processes batch classroom audio, segments distinct speech utterances, and matches individual voices against enrolled profiles. | `Resemblyzer`, `librosa`, `NumPy` |
 | **👤 Passwordless FaceID Student Login** | Students authenticate into their dashboard seamlessly using facial recognition. | `dlib`, `st.camera_input`, `Pillow` |
+| **🍱 Bento-Grid Course Management** | Modern modular cards displaying real-time enrollment numbers, classes held, and attendance statistics. | Custom Bento CSS, `JetBrains Mono` |
 | **🔗 Dynamic QR Code & Link Sharing** | Generates real-time QR codes and instant join links (`?join-code=...`) for one-click course enrollment. | `segno`, `Streamlit Query Params` |
-| **📊 Teacher Analytics & Attendance Logs** | Provides aggregated attendance stats, per-session history breakdown, and course-level enrollment metrics. | `pandas`, `Streamlit Dataframe` |
+| **📊 Teacher Analytics & Attendance Logs** | Aggregated attendance stats, per-session history breakdown, and course-level enrollment metrics. | `pandas`, `Streamlit Dataframe` |
 | **🛡️ Secure Credential Management** | Salting and hashing of all teacher passwords; biometric data stored as mathematical embedding vectors. | `bcrypt`, `Supabase Auth/DB` |
 
 ---
@@ -96,7 +109,7 @@ flowchart TD
 
 | Domain | Technologies Used |
 | :--- | :--- |
-| **Frontend & UI** | [Streamlit](https://streamlit.io), Custom Glassmorphism CSS, Google Fonts (*Outfit*, *Climate Crisis*) |
+| **Frontend & UI** | [Streamlit](https://streamlit.io), Custom Bento CSS, Google Fonts (*Outfit*, *Inter*, *JetBrains Mono*) |
 | **Computer Vision** | [dlib](http://dlib.net), [face_recognition_models](https://github.com/ageitgey/face_recognition_models), [Scikit-Learn](https://scikit-learn.org), [Pillow](https://python-pillow.org) |
 | **Audio & Speech AI** | [Resemblyzer](https://github.com/resemble-ai/Resemblyzer), [Librosa](https://librosa.org), [NumPy](https://numpy.org) |
 | **Database & Cloud** | [Supabase](https://supabase.com) (PostgreSQL Database Engine) |
@@ -165,7 +178,8 @@ CREATE TABLE attendance_logs (
 ## 📂 Project Structure
 
 ```text
-ai-attendance-project-app/
+SnapClass-Attendance/
+├── .gitignore                       # Ignored build caches & local secrets
 ├── .streamlit/
 │   └── secrets.toml.example         # Example configuration template for Supabase credentials
 ├── src/
@@ -179,7 +193,7 @@ ai-attendance-project-app/
 │   │   ├── dialog_voice_attendance.py # Voice attendance recording dialog
 │   │   ├── footer.py                # Reusable application footer
 │   │   ├── header.py                # Reusable application header
-│   │   └── subject_card.py          # Custom subject card UI component
+│   │   └── subject_card.py          # Linear-style Bento Card component
 │   ├── database/                    # Data Access Layer
 │   │   ├── config.py                # Supabase client initializer
 │   │   └── db.py                    # Database queries & bcrypt auth functions
@@ -191,7 +205,7 @@ ai-attendance-project-app/
 │   │   ├── student_screen.py        # FaceID auth, dashboard, & subject enrollment
 │   │   └── teacher_screen.py        # Teacher auth, attendance manager, & logs
 │   └── ui/
-│       └── base_layout.py           # Global typography, color schemes, & button styles
+│       └── base_layout.py           # Linear design tokens, fonts, & button styles
 ├── app.py                           # Application entry point & router
 ├── requirements.txt                 # Project dependencies
 └── README.md                        # Project documentation
@@ -200,8 +214,6 @@ ai-attendance-project-app/
 ---
 
 ## 🚀 Getting Started
-
-Follow these steps to set up and run SnapClass locally on your machine.
 
 ### 1. Prerequisites
 
@@ -257,6 +269,20 @@ The app will launch at `http://localhost:8501`.
 
 ---
 
+## ☁️ Deployment on Streamlit Cloud (1-Click)
+
+1. Fork or push this repository to GitHub.
+2. Go to [**Streamlit Community Cloud**](https://share.streamlit.io/) and log in with GitHub.
+3. Click **"New App"** ➔ Select repository `Shivam95800/SnapClass-Attendance` ➔ Branch `main` ➔ Main file `app.py`.
+4. Under **"Advanced settings... ➔ Secrets"**, add your Supabase credentials:
+   ```toml
+   SUPABASE_URL = "https://your-project.supabase.co"
+   SUPABASE_KEY = "your-key"
+   ```
+5. Click **Deploy!**
+
+---
+
 ## 🖥️ User Workflows
 
 ### 🎓 Student Flow
@@ -267,7 +293,7 @@ The app will launch at `http://localhost:8501`.
 
 ### 👨‍🏫 Teacher Flow
 1. **Teacher Authentication**: Register or log in using your credentials.
-2. **Manage Subjects**: Create classes, retrieve unique class codes, and generate QR code join links.
+2. **Manage Subjects**: Create classes, retrieve unique class codes, and generate QR code join links with Bento Cards.
 3. **Take Attendance**:
    - **Photo Mode**: Upload or take group snapshots of the classroom. Click **Run Face Analysis** to recognize all present students.
    - **Voice Mode**: Record a continuous classroom roll-call audio. The AI segments voices and identifies attendees.
