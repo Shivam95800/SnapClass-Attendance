@@ -1,20 +1,40 @@
 import streamlit as st
+
+
 def subject_card(name, code, section, stats=None, footer_callback=None):
-    html = f"""
-        <div style="background:white; border-left: 8px solid #EB459E; padding:25px; border-radius: 20px; border: 1px solid black; margin-bottom:20px;">
-        <h3 style="margin:0; color: #1e293b; font-size: 1.5rem ">{name}</h3>
-        <p style="color:#64748b; margin:10px 0;">Code : <span style="background:#E0E3FF; color:#5865F2; padding:2px 8px; border-radius:5px;">{code} </span> | Section : {section}</p>
-        
-        """
-    
+    stats_html = ""
     if stats:
-        html+= """
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        """
+        chips = []
         for icon, label, value in stats:
-            html+= f'<div style="background: #EB459E10; padding:5px 12px; border-radius:12px; font-size:0.9rem">{icon} <b>{value}</b> {label} </div>'
-        
-        html+= "</div>"
+            chips.append(f"""
+                <div style="flex: 1 1 45%; min-width: 120px; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1.15rem;">{icon}</span>
+                    <div>
+                        <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748B; font-weight: 600;">{label}</div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: #0F172A;">{value}</div>
+                    </div>
+                </div>
+            """)
+        stats_html = f"""
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0 14px 0;">
+                {"".join(chips)}
+            </div>
+        """
+
+    html = f"""
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 18px; padding: 22px; margin-bottom: 18px; box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05); transition: all 0.2s ease;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                <div>
+                    <h3 style="margin: 0; color: #0F172A; font-size: 1.35rem; font-weight: 700; line-height: 1.25;">{name}</h3>
+                </div>
+                <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                    <span style="background: #EEF2FF; color: #4F46E5; border: 1px solid #C7D2FE; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 700; padding: 3px 8px; border-radius: 6px;">{code}</span>
+                    <span style="background: #FDF2F8; color: #DB2777; border: 1px solid #FBCFE8; font-size: 0.78rem; font-weight: 600; padding: 3px 8px; border-radius: 6px;">Sec {section}</span>
+                </div>
+            </div>
+            {stats_html}
+        </div>
+    """
 
     st.markdown(html, unsafe_allow_html=True)
 
