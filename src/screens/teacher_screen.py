@@ -328,7 +328,7 @@ def register_teacher(teacher_username, teacher_name, teacher_pass, teacher_pass_
         create_teacher(teacher_username, teacher_pass, teacher_name)
         return True, "Account created successfully! Please log in."
     except Exception as e:
-        return False, "Unexpected error occurred during registration."
+        return False, f"Registration failed: {str(e)}"
 
 
 def teacher_screen_register():
@@ -345,8 +345,8 @@ def teacher_screen_register():
     with st.container(border=True):
         st.markdown("<h2 style='text-align: center; margin: 0 0 1rem 0;'>Register Teacher Profile</h2>", unsafe_allow_html=True)
 
-        teacher_username = st.text_input("Username", placeholder='e.g. ananyaroy')
         teacher_name = st.text_input("Full Name", placeholder='e.g. Dr. Ananya Roy')
+        teacher_username = st.text_input("Username", placeholder='e.g. ananyaroy')
         teacher_pass = st.text_input("Password", type='password', placeholder="Choose password")
         teacher_pass_confirm = st.text_input("Confirm Password", type='password', placeholder="Re-enter password")
 
