@@ -4,7 +4,14 @@ from src.ui.base_layout import style_background_dashboard, style_base_layout
 from src.components.header import header_dashboard
 from src.components.footer import footer_dashboard
 from src.components.subject_card import subject_card
-from src.database.db import check_teacher_exists, create_teacher, teacher_login, get_teacher_subjects, get_attendance_for_teacher
+from src.database.db import (
+    check_teacher_exists,
+    create_teacher,
+    teacher_login,
+    get_teacher_subjects,
+    get_attendance_for_teacher,
+    get_enrolled_students_for_subject,
+)
 from src.components.dialog_create_subject import create_subject_dialog
 from src.components.dialog_share_subject import share_subject_dialog
 from src.components.dialog_add_photo import add_photos_dialog
@@ -13,7 +20,6 @@ from src.components.dialog_attendance_results import attendance_result_dialog
 import numpy as np
 from datetime import datetime
 import pandas as pd
-from src.database.config import supabase
 from src.components.dialog_voice_attendance import voice_attendance_dialog
 import time
 
@@ -149,8 +155,7 @@ def teacher_tab_take_attendance():
                             student_id = int(sid)
                             all_detected_ids.setdefault(student_id, []).append(f"Photo {idx+1}")
 
-                enrolled_res = supabase.table('subject_students').select("*, students(*)").eq('subject_id', selected_subject_id).execute()
-                enrolled_students = enrolled_res.data
+                enrolled_students = get_enrolled_students_for_subject(selected_subject_id)
 
                 if not enrolled_students:
                     st.warning('No students enrolled in this course yet.')

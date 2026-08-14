@@ -1,56 +1,65 @@
 import streamlit as st
 import os
-import re
-from supabase import create_client, Client
+import json
 
+import firebase_admin
+from firebase_admin import credentials, firestore
 
-def _get_secrets():
-    """Safely read Supabase credentials from Streamlit secrets or environment."""
-    url = None
-    key = None
-
-    try:
-        url = st.secrets.get("SUPABASE_URL") or st.secrets.get("supabase_url")
-        key = st.secrets.get("SUPABASE_KEY") or st.secrets.get("supabase_key") or st.secrets.get("SUPABASE_ANON_KEY")
-    except Exception:
-        pass
-
-    if not url:
-        url = os.environ.get("SUPABASE_URL") or os.environ.get("supabase_url")
-    if not key:
-        key = os.environ.get("SUPABASE_KEY") or os.environ.get("SUPABASE_ANON_KEY")
-
-    return url, key
-
-
-def _clean_url(url: str) -> str:
-    """Strip trailing slashes and any REST path that shouldn't be in the base URL."""
-    if not url:
-        return url
-    # Remove trailing slashes
-    url = url.rstrip("/")
-    # Remove common mistakenly appended paths
-    for suffix in ["/rest/v1", "/auth/v1", "/storage/v1", "/realtime/v1"]:
-        if url.endswith(suffix):
-            url = url[: -len(suffix)]
-    return url
-
-
-_url, _key = _get_secrets()
-_url = _clean_url(_url) if _url else None
-
+db = None
 _init_error = None
-supabase: Client = None
 
-if _url and _key:
+
+def _initialize_firebase():
+    global db, _init_error
+
+    # Already initialized
+    if firebase_admin._apps:
+        db = firestore.client()
+        return
+
     try:
-        supabase = create_client(_url, _key)
+        cred_data = None
+
+        # 1) Streamlit secrets (production / Streamlit Cloud)
+        try:
+            raw = st.secrets.get("FIREBASE_CREDENTIALS")
+            if raw:
+                cred_data = json.loads(raw) if isinstance(raw, str) else dict(raw)
+        except Exception:
+            pass
+
+        # 2) Environment variable (CI / Docker)
+        if not cred_data:
+            env_raw = os.environ.get("FIREBASE_CREDENTIALS")
+            if env_raw:
+                cred_data = json.loads(env_raw)
+
+        # 3) Local JSON file for development
+        if not cred_data:
+            local_paths = [
+                ".streamlit/firebase-credentials.json",
+                "firebase-credentials.json",
+            ]
+            for path in local_paths:
+                if os.path.exists(path):
+                    with open(path) as f:
+                        cred_data = json.load(f)
+                    break
+
+        if cred_data:
+            cred = credentials.Certificate(cred_data)
+            firebase_admin.initialize_app(cred)
+            db = firestore.client()
+        else:
+            _init_error = (
+                "FIREBASE_CREDENTIALS not found. "
+                "For Streamlit Cloud: add it in App Settings → Secrets as a JSON string. "
+                "For local dev: place firebase-credentials.json in .streamlit/."
+            )
+
     except Exception as e:
         _init_error = str(e)
-else:
-    _init_error = (
-        f"Missing Supabase credentials. "
-        f"URL={'SET' if _url else 'MISSING'}, "
-        f"KEY={'SET' if _key else 'MISSING'}. "
-        f"Go to Streamlit Cloud → App Settings → Secrets and add SUPABASE_URL and SUPABASE_KEY."
-    )
+        print("Firebase init error:", e)
+
+
+_initialize_firebase()

@@ -8,7 +8,7 @@
 
   [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
   [![Streamlit](https://img.shields.io/badge/Streamlit-1.40%2B-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
-  [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
+  [![Firebase](https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
   [![Computer Vision](https://img.shields.io/badge/dlib-Face%20Recognition-00599C?style=for-the-badge&logo=opencv&logoColor=white)](https://github.com/ageitgey/face_recognition)
   [![Voice AI](https://img.shields.io/badge/Resemblyzer-Voice%20Encoder-blueviolet?style=for-the-badge)](https://github.com/resemble-ai/Resemblyzer)
   [![Scikit-Learn](https://img.shields.io/badge/scikit--learn-SVM%20Classifier-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org)
@@ -28,6 +28,7 @@ Traditional classroom attendance methods—such as manual name roll-calls or pap
 2. **🎙️ Voice Biometrics Pipeline**: For audio-based attendance, the teacher records a continuous classroom roll-call. The pipeline splits audio into individual speaker segments using spectral analysis, calculates deep voiceprints via `Resemblyzer`, and matches each voice against registered student voice embeddings.
 3. **🎨 Linear & Cron Inspired UX**: High-density Bento-Grid course cards, floating segmented pill tab switchers, monospace code badges (`JetBrains Mono`), and glassmorphism styling for a responsive, modern interface.
 4. **📲 Effortless Enrollment**: Subject join links and dynamically generated QR codes allow students to register and auto-enroll into courses in one click.
+5. **🔥 Cloud-Native Database**: Powered by **Google Firebase Firestore** for resilient real-time NoSQL storage with zero SQL setup or URL configuration errors.
 
 ---
 
@@ -53,7 +54,7 @@ flowchart TD
     end
 
     subgraph Storage [Database & Security Layer]
-        Supa[(Supabase PostgreSQL)]:::db
+        Firebase[(Google Firebase Firestore)]:::db
         AuthSec[Bcrypt Password Hashing & Vector Storage]:::auth
     end
 
@@ -63,17 +64,17 @@ flowchart TD
 
     StudentUI -->|Webcam Scan / Registration| FacePipeline
     StudentUI -->|Audio Sample Enrollment| VoicePipeline
-    StudentUI <-->|Fetch Enrolled Courses & Logs| Supa
+    StudentUI <-->|Fetch Enrolled Courses & Logs| Firebase
 
     TeacherUI -->|Classroom Snapshot Scan| FacePipeline
     TeacherUI -->|Classroom Audio Roll-call| VoicePipeline
-    TeacherUI -->|Generate Course QR Code / Links| Supa
-    TeacherUI <-->|Manage Subjects & Attendance Records| Supa
+    TeacherUI -->|Generate Course QR Code / Links| Firebase
+    TeacherUI <-->|Manage Subjects & Attendance Records| Firebase
 
-    FacePipeline -.->|Vector Embeddings & Attendance| Supa
-    VoicePipeline -.->|Voiceprint Matching & Attendance| Supa
+    FacePipeline -.->|Vector Embeddings & Attendance| Firebase
+    VoicePipeline -.->|Voiceprint Matching & Attendance| Firebase
     TeacherUI -.-> AuthSec
-    AuthSec -.-> Supa
+    AuthSec -.-> Firebase
 ```
 
 ---
@@ -99,7 +100,7 @@ Inspired by **[Linear](https://linear.app)** and **[Cron](https://cron.com)**, S
 | **🍱 Bento-Grid Course Management** | Modern modular cards displaying real-time enrollment numbers, classes held, and attendance statistics. | Custom Bento CSS, `JetBrains Mono` |
 | **🔗 Dynamic QR Code & Link Sharing** | Generates real-time QR codes and instant join links (`?join-code=...`) for one-click course enrollment. | `segno`, `Streamlit Query Params` |
 | **📊 Teacher Analytics & Attendance Logs** | Aggregated attendance stats, per-session history breakdown, and course-level enrollment metrics. | `pandas`, `Streamlit Dataframe` |
-| **🛡️ Secure Credential Management** | Salting and hashing of all teacher passwords; biometric data stored as mathematical embedding vectors. | `bcrypt`, `Supabase Auth/DB` |
+| **🛡️ Secure Credential Management** | Salting and hashing of all teacher passwords; biometric data stored as mathematical embedding vectors. | `bcrypt`, `Firebase Admin SDK` |
 
 ---
 
@@ -112,7 +113,7 @@ Inspired by **[Linear](https://linear.app)** and **[Cron](https://cron.com)**, S
 | **Frontend & UI** | [Streamlit](https://streamlit.io), Custom Bento CSS, Google Fonts (*Outfit*, *Inter*, *JetBrains Mono*) |
 | **Computer Vision** | [dlib](http://dlib.net), [face_recognition_models](https://github.com/ageitgey/face_recognition_models), [Scikit-Learn](https://scikit-learn.org), [Pillow](https://python-pillow.org) |
 | **Audio & Speech AI** | [Resemblyzer](https://github.com/resemble-ai/Resemblyzer), [Librosa](https://librosa.org), [NumPy](https://numpy.org) |
-| **Database & Cloud** | [Supabase](https://supabase.com) (PostgreSQL Database Engine) |
+| **Database & Cloud** | [Firebase Firestore](https://firebase.google.com) (NoSQL Cloud Database via `firebase-admin`) |
 | **Security & Auth** | [bcrypt](https://pypi.org/project/bcrypt) (Password Encryption), Vectorized Biometrics |
 | **Utilities** | [segno](https://segno.readthedocs.io) (QR Code Generation), [Pandas](https://pandas.pydata.org) |
 
@@ -120,58 +121,23 @@ Inspired by **[Linear](https://linear.app)** and **[Cron](https://cron.com)**, S
 
 ---
 
-## 🗄️ Database Schema & Supabase Setup
+## 🗄️ Database Setup (Firebase Firestore)
 
-SnapClass requires a Supabase PostgreSQL instance. Run the following SQL migration script in your **Supabase SQL Editor**:
+SnapClass uses **Google Firebase Firestore**. Setup takes less than 2 minutes:
 
-```sql
--- 1. Teachers Table
-CREATE TABLE teachers (
-    teacher_id BIGSERIAL PRIMARY KEY,
-    username TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    name TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
+### 1. Create a Firebase Project
+1. Go to [Firebase Console](https://console.firebase.google.com/) and click **"Add project"**.
+2. Give your project a name (e.g., `snapclass-attendance`) and complete creation.
 
--- 2. Students Table
-CREATE TABLE students (
-    student_id BIGSERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    face_embedding JSONB,
-    voice_embedding JSONB,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
+### 2. Enable Cloud Firestore
+1. In the left navigation, click **Build** ➔ **Firestore Database**.
+2. Click **"Create database"** ➔ choose a location close to you (e.g. `asia-south1`) ➔ select **"Start in production mode"** (or test mode).
+3. Collections will be **automatically created** when you use the app — no manual SQL scripts needed!
 
--- 3. Subjects Table
-CREATE TABLE subjects (
-    subject_id BIGSERIAL PRIMARY KEY,
-    subject_code TEXT UNIQUE NOT NULL,
-    name TEXT NOT NULL,
-    section TEXT NOT NULL,
-    teacher_id BIGINT REFERENCES teachers(teacher_id) ON DELETE CASCADE,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 4. Subject Students Mapping (Enrollment)
-CREATE TABLE subject_students (
-    id BIGSERIAL PRIMARY KEY,
-    student_id BIGINT REFERENCES students(student_id) ON DELETE CASCADE,
-    subject_id BIGINT REFERENCES subjects(subject_id) ON DELETE CASCADE,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(student_id, subject_id)
-);
-
--- 5. Attendance Logs Table
-CREATE TABLE attendance_logs (
-    id BIGSERIAL PRIMARY KEY,
-    student_id BIGINT REFERENCES students(student_id) ON DELETE CASCADE,
-    subject_id BIGINT REFERENCES subjects(subject_id) ON DELETE CASCADE,
-    timestamp TEXT NOT NULL,
-    is_present BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
+### 3. Generate Service Account Private Key
+1. Click the **⚙️ Project Settings** (gear icon next to Project Overview).
+2. Go to the **Service accounts** tab.
+3. Click **"Generate new private key"** ➔ Confirm and download the `.json` file.
 
 ---
 
@@ -181,7 +147,7 @@ CREATE TABLE attendance_logs (
 SnapClass-Attendance/
 ├── .gitignore                       # Ignored build caches & local secrets
 ├── .streamlit/
-│   └── secrets.toml.example         # Example configuration template for Supabase credentials
+│   └── secrets.toml.example         # Example configuration template for Firebase credentials
 ├── src/
 │   ├── components/                  # Modular UI Dialogs and Cards
 │   │   ├── dialog_add_photo.py      # Camera capture / bulk photo uploader
@@ -195,8 +161,8 @@ SnapClass-Attendance/
 │   │   ├── header.py                # Reusable application header
 │   │   └── subject_card.py          # Linear-style Bento Card component
 │   ├── database/                    # Data Access Layer
-│   │   ├── config.py                # Supabase client initializer
-│   │   └── db.py                    # Database queries & bcrypt auth functions
+│   │   ├── config.py                # Firebase Admin SDK initializer
+│   │   └── db.py                    # Firestore CRUD & atomic counter operations
 │   ├── pipelines/                   # Biometrics & Machine Learning
 │   │   ├── face_pipeline.py         # dlib face recognition & SVM classification
 │   │   └── voice_pipeline.py        # Librosa audio segmentation & Resemblyzer voiceprints
@@ -217,7 +183,7 @@ SnapClass-Attendance/
 
 ### 1. Prerequisites
 
-- **Python 3.10+** (Python 3.10 - 3.11 recommended)
+- **Python 3.10+** (Python 3.10 - 3.13 supported)
 - **Git**
 - **C++ Compiler** (Required for compiling `dlib` if not using pre-built binary wheels):
   - *Windows*: Visual Studio Build Tools with C++ Desktop Development.
@@ -255,9 +221,23 @@ Create a `.streamlit/secrets.toml` file in the root directory (using `.streamlit
 
 ```toml
 # .streamlit/secrets.toml
-SUPABASE_URL = "https://your-supabase-instance.supabase.co"
-SUPABASE_KEY = "your-supabase-anon-or-service-key"
+FIREBASE_CREDENTIALS = '''
+{
+  "type": "service_account",
+  "project_id": "your-project-id",
+  "private_key_id": "your-key-id",
+  "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-xxxxx@your-project-id.iam.gserviceaccount.com",
+  "client_id": "1234567890",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/..."
+}
+'''
 ```
+
+> 💡 **Tip for Local Development:** You can also simply place your downloaded `firebase-credentials.json` directly inside the `.streamlit/` folder!
 
 ### 6. Run the Application
 
@@ -274,10 +254,22 @@ The app will launch at `http://localhost:8501`.
 1. Fork or push this repository to GitHub.
 2. Go to [**Streamlit Community Cloud**](https://share.streamlit.io/) and log in with GitHub.
 3. Click **"New App"** ➔ Select repository `Shivam95800/SnapClass-Attendance` ➔ Branch `main` ➔ Main file `app.py`.
-4. Under **"Advanced settings... ➔ Secrets"**, add your Supabase credentials:
+4. Under **"Advanced settings... ➔ Secrets"**, paste your Firebase credentials:
    ```toml
-   SUPABASE_URL = "https://your-project.supabase.co"
-   SUPABASE_KEY = "your-key"
+   FIREBASE_CREDENTIALS = '''
+   {
+     "type": "service_account",
+     "project_id": "your-firebase-project-id",
+     "private_key_id": "...",
+     "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n",
+     "client_email": "...",
+     "client_id": "...",
+     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+     "token_uri": "https://oauth2.googleapis.com/token",
+     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+     "client_x509_cert_url": "..."
+   }
+   '''
    ```
 5. Click **Deploy!**
 
@@ -297,29 +289,8 @@ The app will launch at `http://localhost:8501`.
 3. **Take Attendance**:
    - **Photo Mode**: Upload or take group snapshots of the classroom. Click **Run Face Analysis** to recognize all present students.
    - **Voice Mode**: Record a continuous classroom roll-call audio. The AI segments voices and identifies attendees.
-4. **Review & Save**: Confirm the detected attendance list before saving it to Supabase.
+4. **Review & Save**: Confirm the detected attendance list before saving it to Firebase.
 5. **View Records**: Inspect aggregated class-by-class attendance records and statistics.
-
----
-
-## 🗺️ Roadmap & Future Enhancements
-
-- [ ] **Live RTSP/WebRTC Video Stream Attendance**: Continuous background attendance tracking without manual snapshot capture.
-- [ ] **Liveness Detection & Anti-Spoofing**: Blink and texture detection to prevent photo and screen spoofing.
-- [ ] **Automated Export & LMS Integration**: One-click export to Excel/CSV and seamless synchronization with Google Classroom and Canvas LMS.
-- [ ] **Email & SMS Notifications**: Automated alerts to students or parents when attendance falls below threshold limits.
-
----
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
 ---
 
