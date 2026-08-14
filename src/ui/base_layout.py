@@ -33,6 +33,13 @@ def style_background_dashboard():
             .stApp {
                 background: linear-gradient(180deg, #F8FAFC 0%, #EEF2F6 100%) !important;
                 background-attachment: fixed !important;
+                color: #0F172A !important;
+            }
+
+            /* Ensure all text is dark on light dashboard */
+            .stApp p, .stApp span, .stApp div,
+            .stApp label, .stApp li {
+                color: #0F172A;
             }
 
             /* Container cards */
@@ -77,7 +84,7 @@ def style_base_layout():
                 font-size: 1.75rem !important;
                 line-height: 1.2 !important;
                 margin-bottom: 0.5rem !important;
-                color: inherit;
+                color: #0F172A !important;
                 letter-spacing: -0.01em;
             }
 
