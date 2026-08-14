@@ -110,7 +110,7 @@ def student_screen():
     st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
 
     with st.container(border=True):
-        st.markdown("<h2 style='text-align: center; margin: 0 0 0.5rem 0;'>Student FaceID Login</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: center; margin: 0 0 0.5rem 0; color: #0F172A;'>Student FaceID Login</h2>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center; color: #64748B; margin-bottom: 1.5rem;'>Position your face in the center of the camera to verify your identity.</p>", unsafe_allow_html=True)
 
         show_registration = False
@@ -145,10 +145,10 @@ def student_screen():
 
         if show_registration:
             st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
-            st.markdown("<h3>Register New Student Profile</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color: #0F172A;'>Register New Student Profile</h3>", unsafe_allow_html=True)
             new_name = st.text_input("Full Name", placeholder='e.g. Akash Sharma')
 
-            st.markdown("<h4 style='margin-top: 1rem;'>Voice Biometric Enrollment (Optional)</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='margin-top: 1rem; color: #0F172A;'>Voice Biometric Enrollment (Optional)</h4>", unsafe_allow_html=True)
             st.caption("Record a short voice sample for voice roll-calls.")
 
             audio_data = None

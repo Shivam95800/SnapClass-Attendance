@@ -77,8 +77,18 @@ def style_base_layout():
                 font-size: 1.75rem !important;
                 line-height: 1.2 !important;
                 margin-bottom: 0.5rem !important;
-                color: #0F172A !important;
+                color: inherit;
                 letter-spacing: -0.01em;
+            }
+
+            /* Fix button icon + text overlap */
+            button > div {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 6px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
             }
 
             h3 {

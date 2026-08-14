@@ -354,7 +354,7 @@ def teacher_screen_register():
         btnc1, btnc2 = st.columns(2)
 
         with btnc1:
-            if st.button('Register Account', icon=':material/person_add:', width='stretch', type='primary'):
+            if st.button('Register Account', width='stretch', type='primary'):
                 success, message = register_teacher(teacher_username, teacher_name, teacher_pass, teacher_pass_confirm)
                 if success:
                     st.success(message)
