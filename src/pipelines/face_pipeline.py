@@ -97,71 +97,55 @@ def get_face_embeddings(image_np):
         encodings.append(np.array(face_descriptor))
     return encodings
 
-@st.cache_resource
-def get_trained_model():
-    X = []
-    y = []
-
+def predict_attendance(class_image_np, threshold=0.52):
+    """
+    Detects faces in class_image_np, extracts 128D descriptors, and matches each face
+    against registered students using Euclidean distance.
+    Returns (detected_students_dict, all_student_ids, num_detected_faces).
+    """
+    encodings = get_face_embeddings(class_image_np)
+    detected_students = {}
 
     student_db = get_all_students()
-
     if not student_db:
-        return None
-    
-    for student in student_db:
-        embedding = student.get('face_embedding')
-        if embedding:
-            X.append(np.array(embedding))
-            y.append(student.get('student_id'))
+        return detected_students, [], len(encodings)
 
-    if len(X) ==0:
-        return 0
-    
-    clf = SVC(kernel='linear', probability=True, class_weight='balanced')
+    valid_students = []
+    for s in student_db:
+        emb = s.get('face_embedding')
+        if emb:
+            valid_students.append({
+                'student_id': s['student_id'],
+                'name': s.get('name', ''),
+                'embedding': np.array(emb, dtype=float)
+            })
 
-    try:
-        clf.fit(X, y)
-    except ValueError:
-        pass
+    all_ids = [s['student_id'] for s in valid_students]
+    if not valid_students:
+        return detected_students, [], len(encodings)
 
-    return {'clf': clf, 'X':X, "y":y}
+    for encoding in encodings:
+        enc_np = np.array(encoding, dtype=float)
+
+        best_sid = None
+        min_distance = float('inf')
+
+        for s in valid_students:
+            dist = float(np.linalg.norm(s['embedding'] - enc_np))
+            if dist < min_distance:
+                min_distance = dist
+                best_sid = s['student_id']
+
+        # Match only if within strict resemblance threshold (prevents misidentification)
+        if best_sid is not None and min_distance <= threshold:
+            detected_students[int(best_sid)] = True
+
+    return detected_students, all_ids, len(encodings)
 
 
 def train_classifier():
+    """Invalidates cached resources to ensure fresh student data is loaded."""
     st.cache_resource.clear()
-    model_data = get_trained_model()
-    return bool(model_data)
+    return True
 
-def predict_attendance(class_image_np):
-    encodings = get_face_embeddings(class_image_np)
-
-    detected_student = {}
-
-
-    model_data = get_trained_model()
-
-    if not model_data:
-        return detected_student, [], len(encodings)
-    
-    clf = model_data['clf']
-    X_train = model_data['X']
-    y_train = model_data['y']
-
-    all_students = sorted(list(set(y_train)))
-
-    for encoding in encodings:
-        if len(all_students)>= 2:
-            predicted_id= int(clf.predict([encoding])[0])
-        else:
-            predicted_id = int(all_students[0])
-
-        student_embedding = X_train[y_train.index(predicted_id)]
-
-        best_match_score = np.linalg.norm(student_embedding - encoding)
-
-        resemblance_threshold = 0.6
-
-        if best_match_score <= resemblance_threshold:
-            detected_student[predicted_id] = True
-    return detected_student, all_students, len(encodings)
 

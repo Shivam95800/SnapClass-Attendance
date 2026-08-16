@@ -116,7 +116,8 @@ def student_screen():
         if "liveness_frames" not in st.session_state:
             st.session_state.liveness_frames = []
 
-        show_registration = False
+        direct_register = st.toggle("➕ Register new student profile manually", value=False)
+        show_registration = direct_register
 
         # Guided Step Indicator
         num_captured = len(st.session_state.liveness_frames)
@@ -190,6 +191,11 @@ def student_screen():
             st.markdown("<h3 style='color: #0F172A;'>Register New Student Profile</h3>", unsafe_allow_html=True)
             new_name = st.text_input("Full Name", placeholder='e.g. Akash Sharma')
 
+            direct_cam = None
+            if not st.session_state.get('liveness_frames'):
+                st.markdown("<h4 style='margin-top: 1rem; color: #0F172A;'>Face Photo</h4>", unsafe_allow_html=True)
+                direct_cam = st.camera_input("Take Profile Photo", key="direct_reg_photo")
+
             st.markdown("<h4 style='margin-top: 1rem; color: #0F172A;'>Voice Biometric Enrollment (Optional)</h4>", unsafe_allow_html=True)
             st.caption("Anti-replay protection: Speak the dynamic security phrase below to enroll your voiceprint.")
 
@@ -214,9 +220,15 @@ def student_screen():
             if st.button('Complete Registration', type='primary', width='stretch'):
                 if new_name:
                     with st.spinner('Validating liveness & generating biometric embeddings...'):
-                        reg_img = np.array(st.session_state.liveness_frames[0].convert('RGB')) if st.session_state.get('liveness_frames') else None
+                        if st.session_state.get('liveness_frames'):
+                            reg_img = np.array(st.session_state.liveness_frames[0].convert('RGB'))
+                        elif direct_cam:
+                            reg_img = np.array(Image.open(direct_cam).convert('RGB'))
+                        else:
+                            reg_img = None
+
                         if reg_img is None:
-                            st.error('No verified face frame available. Please retake camera scan.')
+                            st.error('No face photo available. Please take a photo with the camera above.')
                         else:
                             encodings = get_face_embeddings(reg_img)
                             if encodings:
