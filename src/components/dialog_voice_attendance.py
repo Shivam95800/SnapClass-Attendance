@@ -1,5 +1,5 @@
 import streamlit as st
-from src.pipelines.voice_pipeline import process_bulk_audio
+from src.pipelines.voice_pipeline import process_bulk_audio, generate_voice_challenge
 from src.database.db import get_enrolled_students_for_subject
 import pandas as pd
 from src.components.dialog_attendance_results import show_attendance_result
@@ -8,7 +8,20 @@ from datetime import datetime
 
 @st.dialog('Voice Attendance')
 def voice_attendance_dialog(selected_subject_id):
-    st.write('Record classroom audio of students saying *"I am present"*. The AI will recognize voices and match student profiles.')
+    if "rollcall_voice_challenge" not in st.session_state or not st.session_state.rollcall_voice_challenge:
+        st.session_state.rollcall_voice_challenge = generate_voice_challenge()
+
+    challenge = st.session_state.rollcall_voice_challenge
+
+    st.write('Record classroom audio of students speaking the security phrase. The AI matches voiceprints to enrolled student profiles.')
+
+    st.markdown(
+        f"<div style='background: #EEF2FF; border: 1px solid #C7D2FE; border-radius: 10px; padding: 10px 14px; margin-bottom: 12px;'>"
+        f"<div style='font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #4F46E5;'>Classroom Security Phrase</div>"
+        f"<div style='font-family: monospace; font-size: 1.25rem; font-weight: 800; color: #1E1B4B; margin-top: 2px;'>\"{challenge}\"</div>"
+        f"</div>",
+        unsafe_allow_html=True
+    )
 
     audio_data = st.audio_input("Record classroom audio")
 

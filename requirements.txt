@@ -17,6 +17,7 @@ bcrypt
 segno
 pillow
 
-# VOICE RECOGNITION
+# VOICE RECOGNITION & LIVENESS STT
 librosa
 resemblyzer
+SpeechRecognition

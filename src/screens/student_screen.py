@@ -5,7 +5,7 @@ from src.components.footer import footer_dashboard
 from PIL import Image
 import numpy as np
 from src.pipelines.face_pipeline import predict_attendance, get_face_embeddings, train_classifier, check_liveness
-from src.pipelines.voice_pipeline import get_voice_embedding
+from src.pipelines.voice_pipeline import get_voice_embedding, generate_voice_challenge, transcribe_and_verify_phrase
 from src.database.db import get_all_students, create_student, get_student_subjects, get_student_attendance, unenroll_student_to_subject
 import time
 from src.components.dialog_enroll import enroll_dialog
@@ -191,17 +191,29 @@ def student_screen():
             new_name = st.text_input("Full Name", placeholder='e.g. Akash Sharma')
 
             st.markdown("<h4 style='margin-top: 1rem; color: #0F172A;'>Voice Biometric Enrollment (Optional)</h4>", unsafe_allow_html=True)
-            st.caption("Record a short voice sample for voice roll-calls.")
+            st.caption("Anti-replay protection: Speak the dynamic security phrase below to enroll your voiceprint.")
+
+            if "voice_enroll_challenge" not in st.session_state or not st.session_state.voice_enroll_challenge:
+                st.session_state.voice_enroll_challenge = generate_voice_challenge()
+
+            challenge = st.session_state.voice_enroll_challenge
+            st.markdown(
+                f"<div style='background: #EEF2FF; border: 1px solid #C7D2FE; border-radius: 10px; padding: 12px 16px; margin: 10px 0 14px 0;'>"
+                f"<span style='font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: #4F46E5; letter-spacing: 0.05em;'>Dynamic Security Phrase</span>"
+                f"<div style='font-family: monospace; font-size: 1.35rem; font-weight: 800; color: #1E1B4B; margin-top: 4px;'>\"{challenge}\"</div>"
+                f"</div>",
+                unsafe_allow_html=True
+            )
 
             audio_data = None
             try:
-                audio_data = st.audio_input('Record a short phrase like "I am present, my name is Akash"')
+                audio_data = st.audio_input(f'Speak "{challenge}" into microphone')
             except Exception:
                 st.error('Microphone access failed.')
 
             if st.button('Complete Registration', type='primary', width='stretch'):
                 if new_name:
-                    with st.spinner('Generating biometric embeddings and creating account...'):
+                    with st.spinner('Validating liveness & generating biometric embeddings...'):
                         reg_img = np.array(st.session_state.liveness_frames[0].convert('RGB')) if st.session_state.get('liveness_frames') else None
                         if reg_img is None:
                             st.error('No verified face frame available. Please retake camera scan.')
@@ -210,20 +222,30 @@ def student_screen():
                             if encodings:
                                 face_emb = encodings[0].tolist()
                                 voice_emb = None
+                                voice_valid = True
+
                                 if audio_data:
-                                    voice_emb = get_voice_embedding(audio_data.read())
+                                    audio_bytes = audio_data.read()
+                                    is_phrase_match, heard_text = transcribe_and_verify_phrase(audio_bytes, challenge)
+                                    if not is_phrase_match:
+                                        voice_valid = False
+                                        st.error(f"⚠️ **Voice Challenge Mismatch**: Heard *\"{heard_text}\"*, but expected *\"{challenge}\"*. Please speak the exact phrase shown to prevent replay attacks.")
+                                    else:
+                                        voice_emb = get_voice_embedding(audio_bytes)
 
-                                response_data = create_student(new_name, face_embedding=face_emb, voice_embedding=voice_emb)
+                                if voice_valid:
+                                    response_data = create_student(new_name, face_embedding=face_emb, voice_embedding=voice_emb)
 
-                                if response_data:
-                                    train_classifier()
-                                    st.session_state.is_logged_in = True
-                                    st.session_state.user_role = 'student'
-                                    st.session_state.student_data = response_data[0]
-                                    st.session_state.liveness_frames = []
-                                    st.toast(f"Profile created! Welcome, {new_name}!", icon="🎉")
-                                    time.sleep(1)
-                                    st.rerun()
+                                    if response_data:
+                                        train_classifier()
+                                        st.session_state.is_logged_in = True
+                                        st.session_state.user_role = 'student'
+                                        st.session_state.student_data = response_data[0]
+                                        st.session_state.liveness_frames = []
+                                        st.session_state.voice_enroll_challenge = None
+                                        st.toast(f"Profile created! Welcome, {new_name}!", icon="🎉")
+                                        time.sleep(1)
+                                        st.rerun()
                             else:
                                 st.error('Could not capture facial features clearly for registration. Please try again.')
                 else:
