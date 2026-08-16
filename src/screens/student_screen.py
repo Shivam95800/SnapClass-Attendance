@@ -4,7 +4,7 @@ from src.components.header import header_dashboard
 from src.components.footer import footer_dashboard
 from PIL import Image
 import numpy as np
-from src.pipelines.face_pipeline import predict_attendance, get_face_embeddings, train_classifier
+from src.pipelines.face_pipeline import predict_attendance, get_face_embeddings, train_classifier, check_liveness
 from src.pipelines.voice_pipeline import get_voice_embedding
 from src.database.db import get_all_students, create_student, get_student_subjects, get_student_attendance, unenroll_student_to_subject
 import time
@@ -111,37 +111,79 @@ def student_screen():
 
     with st.container(border=True):
         st.markdown("<h2 style='text-align: center; margin: 0 0 0.5rem 0; color: #0F172A;'>Student FaceID Login</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: #64748B; margin-bottom: 1.5rem;'>Position your face in the center of the camera to verify your identity.</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: #64748B; margin-bottom: 1.5rem;'>Position your face in the center of the camera. Anti-spoofing requires a 2-shot liveness check (Eyes Open + Blink).</p>", unsafe_allow_html=True)
+
+        if "liveness_frames" not in st.session_state:
+            st.session_state.liveness_frames = []
 
         show_registration = False
-        photo_source = st.camera_input("Face Scan", label_visibility="collapsed")
 
-        if photo_source:
-            img = np.array(Image.open(photo_source))
+        # Guided Step Indicator
+        num_captured = len(st.session_state.liveness_frames)
+        if num_captured == 0:
+            st.info("📸 **Step 1 of 2**: Look straight into the camera with **eyes open** and take a snapshot.")
+            photo_source = st.camera_input("Step 1: Face Scan (Eyes Open)", key="face_cam_step1")
+            if photo_source:
+                st.session_state.liveness_frames.append(Image.open(photo_source))
+                st.rerun()
 
-            with st.spinner('AI is scanning your facial features...'):
-                detected, all_ids, num_faces = predict_attendance(img)
+        elif num_captured == 1:
+            st.info("👁️ **Step 2 of 2 (Anti-Spoofing)**: Now **blink or close your eyes** and take a 2nd snapshot to verify live presence.")
+            photo_source = st.camera_input("Step 2: Blink Verification", key="face_cam_step2")
 
-                if num_faces == 0:
-                    st.warning('No face detected. Please ensure good lighting and face the camera directly.')
-                elif num_faces > 1:
-                    st.warning('Multiple faces detected. Please ensure only one person is in frame.')
+            c_retry1, c_retry2 = st.columns([3, 1])
+            with c_retry2:
+                if st.button("🔄 Retake Step 1", type="tertiary"):
+                    st.session_state.liveness_frames = []
+                    st.rerun()
+
+            if photo_source:
+                st.session_state.liveness_frames.append(Image.open(photo_source))
+                st.rerun()
+
+        else:
+            # 2 frames captured: Run Liveness Anti-Spoofing & Attendance prediction
+            frame_open = np.array(st.session_state.liveness_frames[0].convert('RGB'))
+            frame_blink = np.array(st.session_state.liveness_frames[1].convert('RGB'))
+
+            with st.spinner('AI is performing anti-spoofing liveness & biometric analysis...'):
+                is_live = check_liveness([frame_open, frame_blink])
+
+                if not is_live:
+                    st.error("⚠️ **Liveness Verification Failed**: No natural eye blink detected across the frames. Holding up a static photo or video replay is prohibited. Please retry with a live camera.")
+                    if st.button("🔄 Retry Liveness Verification", type="primary"):
+                        st.session_state.liveness_frames = []
+                        st.rerun()
                 else:
-                    if detected:
-                        student_id = list(detected.keys())[0]
-                        all_students = get_all_students()
-                        student = next((s for s in all_students if s['student_id'] == student_id), None)
+                    detected, all_ids, num_faces = predict_attendance(frame_open)
 
-                        if student:
-                            st.session_state.is_logged_in = True
-                            st.session_state.user_role = 'student'
-                            st.session_state.student_data = student
-                            st.toast(f"Welcome back, {student['name']}!", icon="👋")
-                            time.sleep(0.8)
+                    if num_faces == 0:
+                        st.warning('No face detected in the primary frame. Please ensure good lighting and face the camera directly.')
+                        if st.button("🔄 Try Again"):
+                            st.session_state.liveness_frames = []
+                            st.rerun()
+                    elif num_faces > 1:
+                        st.warning('Multiple faces detected. Please ensure only one person is in frame.')
+                        if st.button("🔄 Try Again"):
+                            st.session_state.liveness_frames = []
                             st.rerun()
                     else:
-                        st.info('Face not recognized in our database. Register your profile below to get started!')
-                        show_registration = True
+                        if detected:
+                            student_id = list(detected.keys())[0]
+                            all_students = get_all_students()
+                            student = next((s for s in all_students if s['student_id'] == student_id), None)
+
+                            if student:
+                                st.session_state.is_logged_in = True
+                                st.session_state.user_role = 'student'
+                                st.session_state.student_data = student
+                                st.session_state.liveness_frames = []
+                                st.toast(f"Welcome back, {student['name']}! (Liveness Verified ✅)", icon="👋")
+                                time.sleep(0.8)
+                                st.rerun()
+                        else:
+                            st.info('Face liveness verified ✅, but profile is not recognized in our database. Register below!')
+                            show_registration = True
 
         if show_registration:
             st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
@@ -160,26 +202,30 @@ def student_screen():
             if st.button('Complete Registration', type='primary', width='stretch'):
                 if new_name:
                     with st.spinner('Generating biometric embeddings and creating account...'):
-                        img = np.array(Image.open(photo_source))
-                        encodings = get_face_embeddings(img)
-                        if encodings:
-                            face_emb = encodings[0].tolist()
-                            voice_emb = None
-                            if audio_data:
-                                voice_emb = get_voice_embedding(audio_data.read())
-
-                            response_data = create_student(new_name, face_embedding=face_emb, voice_embedding=voice_emb)
-
-                            if response_data:
-                                train_classifier()
-                                st.session_state.is_logged_in = True
-                                st.session_state.user_role = 'student'
-                                st.session_state.student_data = response_data[0]
-                                st.toast(f"Profile created! Welcome, {new_name}!", icon="🎉")
-                                time.sleep(1)
-                                st.rerun()
+                        reg_img = np.array(st.session_state.liveness_frames[0].convert('RGB')) if st.session_state.get('liveness_frames') else None
+                        if reg_img is None:
+                            st.error('No verified face frame available. Please retake camera scan.')
                         else:
-                            st.error('Could not capture facial features clearly for registration. Please try again.')
+                            encodings = get_face_embeddings(reg_img)
+                            if encodings:
+                                face_emb = encodings[0].tolist()
+                                voice_emb = None
+                                if audio_data:
+                                    voice_emb = get_voice_embedding(audio_data.read())
+
+                                response_data = create_student(new_name, face_embedding=face_emb, voice_embedding=voice_emb)
+
+                                if response_data:
+                                    train_classifier()
+                                    st.session_state.is_logged_in = True
+                                    st.session_state.user_role = 'student'
+                                    st.session_state.student_data = response_data[0]
+                                    st.session_state.liveness_frames = []
+                                    st.toast(f"Profile created! Welcome, {new_name}!", icon="🎉")
+                                    time.sleep(1)
+                                    st.rerun()
+                            else:
+                                st.error('Could not capture facial features clearly for registration. Please try again.')
                 else:
                     st.warning('Please enter your name.')
 

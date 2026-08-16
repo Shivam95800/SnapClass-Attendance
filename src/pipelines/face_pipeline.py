@@ -24,15 +24,75 @@ def load_dlib_models():
 
     return detector, sp, facerec
 
+def compute_ear_from_landmarks(shape):
+    """Compute Eye Aspect Ratio (EAR) from dlib 68-point shape."""
+    def _eye_ear(indices):
+        pts = np.array([[shape.part(i).x, shape.part(i).y] for i in indices], dtype=float)
+        # Vertical eye distances
+        v1 = np.linalg.norm(pts[1] - pts[5])
+        v2 = np.linalg.norm(pts[2] - pts[4])
+        # Horizontal eye distance
+        h = np.linalg.norm(pts[0] - pts[3])
+        if h == 0:
+            return 0.0
+        return (v1 + v2) / (2.0 * h)
+
+    left_ear = _eye_ear([36, 37, 38, 39, 40, 41])
+    right_ear = _eye_ear([42, 43, 44, 45, 46, 47])
+    return (left_ear + right_ear) / 2.0
+
+
+def check_liveness(frames: list) -> bool:
+    """
+    Evaluates a sequence of captured frames (RGB numpy arrays or PIL Images)
+    to confirm liveness by detecting natural eye blink dynamics (Anti-Spoofing).
+    Returns True if natural blinking/eye motion is confirmed, False for static photos or spoofs.
+    """
+    if not frames or len(frames) < 2:
+        return False
+
+    detector, sp, _ = load_dlib_models()
+    ears = []
+
+    for frame in frames:
+        if hasattr(frame, 'convert'):
+            frame_np = np.array(frame.convert('RGB'))
+        elif isinstance(frame, np.ndarray):
+            frame_np = frame
+        else:
+            continue
+
+        faces = detector(frame_np, 0)
+        if not faces:
+            faces = detector(frame_np, 1)
+
+        if faces:
+            face = faces[0]
+            shape = sp(frame_np, face)
+            ear_val = compute_ear_from_landmarks(shape)
+            ears.append(ear_val)
+
+    if len(ears) < 2:
+        return False
+
+    min_ear = min(ears)
+    max_ear = max(ears)
+    ear_range = max_ear - min_ear
+
+    # Liveness check: requires eye closure/open transition or dynamic EAR range
+    is_live = (min_ear <= 0.22 and max_ear >= 0.25) or (ear_range >= 0.065)
+    return is_live
+
+
 def get_face_embeddings(image_np):
     detector, sp, facerec = load_dlib_models()
     faces = detector(image_np, 1)
 
-    encodings= []
+    encodings = []
 
     for face in faces:
         shape = sp(image_np, face)
-        face_descriptor = facerec.compute_face_descriptor(image_np, shape, 1) #128 embedding
+        face_descriptor = facerec.compute_face_descriptor(image_np, shape, 1)  # 128 embedding
 
         encodings.append(np.array(face_descriptor))
     return encodings
