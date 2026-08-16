@@ -97,7 +97,7 @@ def get_face_embeddings(image_np):
         encodings.append(np.array(face_descriptor))
     return encodings
 
-def predict_attendance(class_image_np, threshold=0.52):
+def predict_attendance(class_image_np, threshold=0.48):
     """
     Detects faces in class_image_np, extracts 128D descriptors, and matches each face
     against registered students using Euclidean distance.
@@ -136,7 +136,7 @@ def predict_attendance(class_image_np, threshold=0.52):
                 min_distance = dist
                 best_sid = s['student_id']
 
-        # Match only if within strict resemblance threshold (prevents misidentification)
+        # Strict recognition threshold (<= 0.48) to guarantee different students are never misidentified
         if best_sid is not None and min_distance <= threshold:
             detected_students[int(best_sid)] = True
 

@@ -26,21 +26,22 @@ def student_dashboard():
             st.markdown(f"<div style='text-align: right; color: #0F172A; font-weight: 600; font-size: 0.95rem;'>Hi, {student_data['name']} 👋</div>", unsafe_allow_html=True)
         with btn_c2:
             if st.button("🚪 Logout", type='tertiary', key='student_logout_btn'):
-                st.session_state['is_logged_in'] = False
-                st.session_state['login_type'] = None
-                if 'student_data' in st.session_state:
-                    del st.session_state['student_data']
-                st.session_state.liveness_frames = []
+                st.session_state.clear()
                 st.rerun()
 
     st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
 
-    header_col1, header_col2 = st.columns([3, 1], vertical_alignment='center')
+    header_col1, header_col2, header_col3 = st.columns([2, 1, 1], vertical_alignment='center')
     with header_col1:
         st.markdown("<h2 style='margin: 0;'>Enrolled Courses</h2>", unsafe_allow_html=True)
     with header_col2:
         if st.button('＋ Enroll in Subject', type='primary', width='stretch'):
             enroll_dialog()
+    with header_col3:
+        if st.button('👤 Switch / New Student', type='secondary', width='stretch'):
+            st.session_state.clear()
+            st.session_state['login_type'] = 'student'
+            st.rerun()
 
     st.markdown("<div style='margin-top: 1.25rem;'></div>", unsafe_allow_html=True)
 
