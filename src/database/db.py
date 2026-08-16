@@ -333,3 +333,68 @@ def get_attendance_for_teacher(teacher_id: int):
     except Exception as e:
         print("get_attendance_for_teacher error:", e)
         return []
+
+
+# ─────────────────────────────────────────────
+# QR & Attendance Sessions (TTL Expiry)
+# ─────────────────────────────────────────────
+def create_session(subject_id: int, ttl_minutes: int = 15) -> dict:
+    """Creates a temporary attendance/join session in Firestore with a configured TTL."""
+    try:
+        import uuid
+        from datetime import datetime, timedelta, timezone
+
+        client = _get_client()
+        session_id = str(uuid.uuid4())[:8].upper()
+        now = datetime.now(timezone.utc)
+        expires_at = now + timedelta(minutes=ttl_minutes)
+
+        session_data = {
+            "session_id": session_id,
+            "subject_id": subject_id,
+            "created_at": now.isoformat(),
+            "expires_at": expires_at.isoformat(),
+            "ttl_minutes": ttl_minutes,
+            "is_active": True,
+        }
+        client.collection("sessions").document(session_id).set(session_data)
+        return session_data
+    except Exception as e:
+        print("create_session error:", e)
+        return {}
+
+
+def verify_session(session_id: str) -> tuple[bool, str, dict]:
+    """
+    Verifies if a session token exists and has not expired.
+    Returns (is_valid, message, session_dict).
+    """
+    if not session_id:
+        return False, "Session token is missing.", {}
+
+    try:
+        from datetime import datetime, timezone
+
+        client = _get_client()
+        doc = client.collection("sessions").document(session_id.strip().upper()).get()
+        if not doc.exists:
+            return False, "Invalid session code.", {}
+
+        data = doc.to_dict()
+        if not data.get("is_active", True):
+            return False, "This session has been closed by the teacher.", data
+
+        expires_at_str = data.get("expires_at")
+        if expires_at_str:
+            expires_at = datetime.fromisoformat(expires_at_str)
+            if expires_at.tzinfo is None:
+                expires_at = expires_at.replace(tzinfo=timezone.utc)
+            now = datetime.now(timezone.utc)
+            if now > expires_at:
+                return False, f"This session link has expired (exceeded {data.get('ttl_minutes', 15)}-minute limit). Please ask your teacher for a fresh QR code.", data
+
+        return True, "Session is active and valid.", data
+    except Exception as e:
+        print("verify_session error:", e)
+        return False, f"Error verifying session: {str(e)}", {}
+

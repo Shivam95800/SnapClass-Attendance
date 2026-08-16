@@ -213,7 +213,7 @@ def teacher_tab_manage_subjects():
             def make_share_btn(current_sub=sub):
                 def share_btn():
                     if st.button(f"Share Code & QR", key=f"share_{current_sub['subject_code']}_{current_sub['subject_id']}", icon=":material/qr_code_2:", width='stretch', type='tertiary'):
-                        share_subject_dialog(current_sub['name'], current_sub['subject_code'])
+                        share_subject_dialog(current_sub['name'], current_sub['subject_code'], current_sub.get('subject_id'))
                 return share_btn
 
             with cols[i % 2]:
