@@ -28,7 +28,7 @@ def teacher_screen():
     style_background_dashboard()
     style_base_layout()
 
-    if "teacher_data" in st.session_state:
+    if "teacher_data" in st.session_state and st.session_state.get('is_logged_in', False):
         teacher_dashboard()
     elif 'teacher_login_type' not in st.session_state or st.session_state.teacher_login_type == "login":
         teacher_screen_login()
@@ -48,10 +48,11 @@ def teacher_dashboard():
         with btn_c1:
             st.markdown(f"<div style='text-align: right; color: #0F172A; font-weight: 600; font-size: 0.95rem;'>Hi, {teacher_data['name']} 👋</div>", unsafe_allow_html=True)
         with btn_c2:
-            if st.button("Logout", type='tertiary', key='teacher_logout_btn', icon=":material/logout:"):
+            if st.button("🚪 Logout", type='tertiary', key='teacher_logout_btn'):
                 st.session_state['is_logged_in'] = False
+                st.session_state['login_type'] = None
                 if 'teacher_data' in st.session_state:
-                    del st.session_state.teacher_data
+                    del st.session_state['teacher_data']
                 st.rerun()
 
     st.markdown("<div style='margin-top: 1.25rem;'></div>", unsafe_allow_html=True)
@@ -115,7 +116,7 @@ def teacher_tab_take_attendance():
             selected_subject_label = st.selectbox('Course', options=list(subject_options.keys()), label_visibility='collapsed')
 
         with col2:
-            if st.button('Add Photos', type='primary', icon=':material/add_a_photo:', width='stretch'):
+            if st.button('📸 Add Photos', type='primary', width='stretch'):
                 add_photos_dialog()
 
     selected_subject_id = subject_options[selected_subject_label]
@@ -137,12 +138,12 @@ def teacher_tab_take_attendance():
     c1, c2, c3 = st.columns(3)
 
     with c1:
-        if st.button('Clear Photos', width='stretch', type='tertiary', icon=':material/delete_sweep:', disabled=not has_photos):
+        if st.button('🗑️ Clear Photos', width='stretch', type='tertiary', disabled=not has_photos):
             st.session_state.attendance_images = []
             st.rerun()
 
     with c2:
-        if st.button('Run Face Analysis', width='stretch', type='primary', icon=':material/face:', disabled=not has_photos):
+        if st.button('✨ Run Face Analysis', width='stretch', type='primary', disabled=not has_photos):
             with st.spinner('Deep scanning classroom photos...'):
                 all_detected_ids = {}
 
@@ -185,7 +186,7 @@ def teacher_tab_take_attendance():
                     attendance_result_dialog(pd.DataFrame(results), attendance_to_log)
 
     with c3:
-        if st.button('Voice Attendance', type='secondary', width='stretch', icon=':material/mic:'):
+        if st.button('🎙️ Voice Attendance', type='secondary', width='stretch'):
             voice_attendance_dialog(selected_subject_id)
 
 
@@ -212,7 +213,7 @@ def teacher_tab_manage_subjects():
 
             def make_share_btn(current_sub=sub):
                 def share_btn():
-                    if st.button(f"Share Code & QR", key=f"share_{current_sub['subject_code']}_{current_sub['subject_id']}", icon=":material/qr_code_2:", width='stretch', type='tertiary'):
+                    if st.button(f"📱 Share Code & QR", key=f"share_{current_sub['subject_code']}_{current_sub['subject_id']}", width='stretch', type='tertiary'):
                         share_subject_dialog(current_sub['name'], current_sub['subject_code'], current_sub.get('subject_id'))
                 return share_btn
 

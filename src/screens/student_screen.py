@@ -25,10 +25,12 @@ def student_dashboard():
         with btn_c1:
             st.markdown(f"<div style='text-align: right; color: #0F172A; font-weight: 600; font-size: 0.95rem;'>Hi, {student_data['name']} 👋</div>", unsafe_allow_html=True)
         with btn_c2:
-            if st.button("Logout", type='tertiary', key='student_logout_btn', icon=":material/logout:"):
+            if st.button("🚪 Logout", type='tertiary', key='student_logout_btn'):
                 st.session_state['is_logged_in'] = False
+                st.session_state['login_type'] = None
                 if 'student_data' in st.session_state:
-                    del st.session_state.student_data
+                    del st.session_state['student_data']
+                st.session_state.liveness_frames = []
                 st.rerun()
 
     st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
@@ -65,7 +67,7 @@ def student_dashboard():
 
             def make_unenroll_btn(current_sub=sub, current_sid=sid):
                 def unenroll_button():
-                    if st.button("Unenroll Course", key=f"unenroll_{current_sid}", type='tertiary', width='stretch', icon=':material/delete_forever:'):
+                    if st.button("🗑️ Unenroll Course", key=f"unenroll_{current_sid}", type='tertiary', width='stretch'):
                         unenroll_student_to_subject(student_id, current_sid)
                         sub_name = current_sub['name']
                         st.toast(f"Unenrolled from {sub_name} successfully!")
@@ -95,7 +97,7 @@ def student_screen():
     style_background_dashboard()
     style_base_layout()
 
-    if "student_data" in st.session_state:
+    if "student_data" in st.session_state and st.session_state.get('is_logged_in', False):
         student_dashboard()
         return
 
