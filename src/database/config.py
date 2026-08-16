@@ -17,10 +17,11 @@ def _find_credentials():
             # Direct key names
             candidate_keys = [
                 "FIREBASE_CREDENTIALS",
-                "firebase_credentials",
-                "Firebase credential",
                 "FIREBASE_CREDENTIAL",
+                "firebase_credentials",
                 "firebase_credential",
+                "Firebase credential",
+                "Firebase credentials",
                 "firebase",
                 "FIREBASE",
                 "credentials",
@@ -32,7 +33,6 @@ def _find_credentials():
                         try:
                             return json.loads(val.strip())
                         except Exception:
-                            # Try replacing single quotes or literal newlines if needed
                             try:
                                 return json.loads(val.replace("'", '"'))
                             except Exception:
@@ -53,7 +53,7 @@ def _find_credentials():
         print("Secrets parse notice:", e)
 
     # 2. Check Environment Variables
-    for env_key in ["FIREBASE_CREDENTIALS", "GOOGLE_APPLICATION_CREDENTIALS_JSON"]:
+    for env_key in ["FIREBASE_CREDENTIALS", "FIREBASE_CREDENTIAL", "GOOGLE_APPLICATION_CREDENTIALS_JSON"]:
         env_raw = os.environ.get(env_key)
         if env_raw:
             try:
@@ -79,12 +79,19 @@ def _find_credentials():
     return None
 
 
-def _initialize_firebase():
+def get_db():
+    """Lazy initialize and return the Firestore client."""
     global db, _init_error
 
+    if db is not None:
+        return db
+
     if firebase_admin._apps:
-        db = firestore.client()
-        return
+        try:
+            db = firestore.client()
+            return db
+        except Exception:
+            pass
 
     try:
         cred_data = _find_credentials()
@@ -97,16 +104,20 @@ def _initialize_firebase():
             cred = credentials.Certificate(cred_data)
             firebase_admin.initialize_app(cred)
             db = firestore.client()
+            _init_error = None
+            return db
         else:
             _init_error = (
-                "FIREBASE_CREDENTIALS not found. "
-                "For Streamlit Cloud: add it in App Settings → Secrets as a JSON string. "
-                "For local dev: place firebase-credentials.json in .streamlit/."
+                "FIREBASE_CREDENTIALS not found in Streamlit Secrets. "
+                "Please add FIREBASE_CREDENTIALS = '''{...}''' in App Settings → Secrets."
             )
 
     except Exception as e:
         _init_error = f"Firebase initialization error: {str(e)}"
         print("Firebase init error:", e)
 
+    return None
 
-_initialize_firebase()
+
+# Initialize on import
+get_db()
