@@ -197,11 +197,8 @@ def ai_guide_dialog(role: str = "general", context_data: dict = None):
         if user_query:
             with st.spinner("AI is analyzing codebase & biometric documentation..."):
                 answer = find_best_answer(user_query)
-                st.markdown(f"""
-                    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px; margin-top: 14px;">
-                        {answer}
-                    </div>
-                """, unsafe_allow_html=True)
+                with st.container(border=True):
+                    st.markdown(answer)
 
     # ─────────────────────────────────────────────
     # TAB 2: Step-by-Step Guides
@@ -248,34 +245,19 @@ def ai_guide_dialog(role: str = "general", context_data: dict = None):
     with tab3:
         st.markdown("### 📊 AI Analytics & Compliance Insights")
 
-        # High-level stats cards
+        # Native Streamlit metrics (Adapts to both Dark & Light Themes automatically!)
         col_a, col_b, col_c = st.columns(3)
         with col_a:
-            st.markdown("""
-                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 14px; border-radius: 12px; text-align: center;">
-                    <div style="color: #64748B; font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Target Attendance</div>
-                    <div style="font-size: 1.5rem; font-weight: 800; color: #4F46E5;">75.0%</div>
-                    <div style="color: #10B981; font-size: 0.72rem; font-weight: 600;">Standard Policy</div>
-                </div>
-            """, unsafe_allow_html=True)
+            with st.container(border=True):
+                st.metric(label="Target Attendance", value="75.0%", delta="Standard Policy")
 
         with col_b:
-            st.markdown("""
-                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 14px; border-radius: 12px; text-align: center;">
-                    <div style="color: #64748B; font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Time Saved</div>
-                    <div style="font-size: 1.5rem; font-weight: 800; color: #059669;">~12 Mins</div>
-                    <div style="color: #64748B; font-size: 0.72rem;">Per Lecture Session</div>
-                </div>
-            """, unsafe_allow_html=True)
+            with st.container(border=True):
+                st.metric(label="Time Saved", value="~12 Mins", delta="Per Lecture Session")
 
         with col_c:
-            st.markdown("""
-                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 14px; border-radius: 12px; text-align: center;">
-                    <div style="color: #64748B; font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Proxy Rate</div>
-                    <div style="font-size: 1.5rem; font-weight: 800; color: #DC2626;">0.0%</div>
-                    <div style="color: #059669; font-size: 0.72rem; font-weight: 600;">Zero Buddy Punching</div>
-                </div>
-            """, unsafe_allow_html=True)
+            with st.container(border=True):
+                st.metric(label="Proxy Rate", value="0.0%", delta="Zero Buddy Punching")
 
         st.markdown("<div style='margin-top: 18px;'></div>", unsafe_allow_html=True)
         st.info("💡 **Compliance Notice**: Students falling below the 75% attendance threshold will be automatically highlighted with warning tags in the teacher's Attendance Records tab.")
