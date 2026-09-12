@@ -47,4 +47,11 @@ def home_screen():
             st.session_state['login_type'] = 'teacher'
             st.rerun()
 
+    st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
+    guide_col1, guide_col2, guide_col3 = st.columns([1, 2, 1])
+    with guide_col2:
+        if st.button("✨ Open SnapClass AI Guide & Assistant", type="secondary", width="stretch", key="home_ai_guide_btn"):
+            from src.components.dialog_ai_guide import ai_guide_dialog
+            ai_guide_dialog(role="general")
+
     footer_home()

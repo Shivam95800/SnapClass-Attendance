@@ -102,6 +102,7 @@ Inspired by **[Linear](https://linear.app)** and **[Cron](https://cron.com)**, S
 | **🔗 Dynamic QR Code & Link Sharing** | Generates real-time QR codes and instant join links (`?join-code=...`) for one-click course enrollment. | `segno`, `Streamlit Query Params` |
 | **📊 Teacher Analytics & Attendance Logs** | Aggregated attendance stats, per-session history breakdown, and course-level enrollment metrics. | `pandas`, `Streamlit Dataframe` |
 | **🛡️ Secure Credential Management** | Salting and hashing of all teacher passwords; biometric data stored as mathematical embedding vectors. | `bcrypt`, `Firebase Admin SDK` |
+| **🤖 In-App AI Guide & Copilot** | Context-aware interactive AI assistant for instant Q&A, biometric troubleshooting, and automated attendance compliance analysis. | `st.dialog`, Custom NLP Knowledge Base |
 
 ---
 

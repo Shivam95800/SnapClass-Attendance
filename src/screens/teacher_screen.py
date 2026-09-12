@@ -44,7 +44,11 @@ def teacher_dashboard():
     with nav_c1:
         header_dashboard()
     with nav_c2:
-        btn_c1, btn_c2 = st.columns([2, 1], vertical_alignment='center')
+        guide_c, btn_c1, btn_c2 = st.columns([1.2, 1.8, 1], vertical_alignment='center')
+        with guide_c:
+            if st.button("✨ AI Guide", type='secondary', key='teacher_ai_guide_btn'):
+                from src.components.dialog_ai_guide import ai_guide_dialog
+                ai_guide_dialog(role="teacher")
         with btn_c1:
             st.markdown(f"<div style='text-align: right; color: #0F172A; font-weight: 600; font-size: 0.95rem;'>Hi, {teacher_data['name']} 👋</div>", unsafe_allow_html=True)
         with btn_c2:
