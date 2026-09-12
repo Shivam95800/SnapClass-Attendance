@@ -28,7 +28,8 @@ Traditional classroom attendance methods—such as manual name roll-calls or pap
 2. **🎙️ Voice Biometrics Pipeline**: For audio-based attendance, the teacher records a continuous classroom roll-call. The pipeline splits audio into individual speaker segments using spectral analysis, calculates deep voiceprints via `Resemblyzer`, and matches each voice against registered student voice embeddings.
 3. **🎨 Linear & Cron Inspired UX**: High-density Bento-Grid course cards, floating segmented pill tab switchers, monospace code badges (`JetBrains Mono`), and glassmorphism styling for a responsive, modern interface.
 4. **📲 Effortless Enrollment**: Subject join links and dynamically generated QR codes allow students to register and auto-enroll into courses in one click.
-5. **🔥 Cloud-Native Database**: Powered by **Google Firebase Firestore** for resilient real-time NoSQL storage with zero SQL setup or URL configuration errors.
+5. 🔥 **Cloud-Native Database**: Powered by **Google Firebase Firestore** for resilient real-time NoSQL storage with zero SQL setup or URL configuration errors.
+6. 🎬 **Interactive Explainer Presentation**: Built-in 16:9 animated video & presentation player (`explainer_video.html`) for project demos, viva presentations, and LinkedIn showcases.
 
 ---
 
