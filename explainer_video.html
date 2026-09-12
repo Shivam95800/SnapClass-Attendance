@@ -657,7 +657,7 @@
               <div class="soundwave-bar"></div>
               <div class="soundwave-bar"></div>
             </div>
-            <span id="voice-source-text">Voiceover: Shivam Soni (Scene 1 Ready)</span>
+            <span id="voice-source-text">Voiceover: AI Speech (Default)</span>
           </div>
           <button class="btn btn-clean-mode" id="toggle-clean-view-btn" title="Toggle Clean Mode for Screen Recording">
             🖥️ Recording Mode
@@ -857,8 +857,8 @@
 
           <div class="chapters">
             <div class="chapter-pill active" onclick="goToScene(0)">
-              <div class="voice-status-dot recorded" id="dot-0"></div>
-              <span>1. Intro (Shivam)</span>
+              <div class="voice-status-dot" id="dot-0"></div>
+              <span>1. Intro</span>
             </div>
             <div class="chapter-pill" onclick="goToScene(1)">
               <div class="voice-status-dot" id="dot-1"></div>
@@ -877,7 +877,7 @@
               <span>5. Security</span>
             </div>
             <div class="chapter-pill" onclick="goToScene(5)">
-              <div class="voice-status-dot recorded" id="dot-5"></div>
+              <div class="voice-status-dot" id="dot-5"></div>
               <span>6. Outro</span>
             </div>
           </div>
@@ -906,14 +906,14 @@
       <div class="teleprompter-box">
         <div class="teleprompter-label">
           <span id="teleprompter-scene-title">Scene 1 Script</span>
-          <span id="scene-voice-status" style="color: #4ade80;">🟢 Shivam's voice is preloaded!</span>
+          <span id="scene-voice-status" style="color: #94a3b8;">⚪ AI Voiceover ready (or record below)</span>
         </div>
         <div class="teleprompter-script-choice">
           <span class="lang-chip active" id="chip-english" onclick="setScriptLang('english')">English</span>
           <span class="lang-chip" id="chip-hinglish" onclick="setScriptLang('hinglish')">Hinglish / Hindi</span>
         </div>
         <div class="teleprompter-text" id="teleprompter-script">
-          "Hello, my name is Shivam Soni. SnapClass is an AI-powered smart attendance system that replaces manual roll-call."
+          "Traditional attendance takes 10 to 15 minutes every lecture, causing disruptions and buddy punching. SnapClass solves this with instant dual-modality AI biometrics."
         </div>
       </div>
 
@@ -943,14 +943,14 @@
     const scenes = [
       {
         title: "1. Intro",
-        duration: 7,
-        caption: "Hello, my name is Shivam Soni. SnapClass is an AI-powered smart attendance system that replaces manual roll-call.",
+        duration: 15,
+        caption: "Traditional attendance takes 10 to 15 minutes and suffers from buddy punching. SnapClass solves this with dual-modality AI biometrics.",
         scripts: {
-          english: "Hello, my name is Shivam Soni. SnapClass is an AI-powered smart attendance system that replaces manual roll-call.",
-          hinglish: "Hello, mera naam Shivam Soni hai. SnapClass ek AI-powered attendance system hai jo manual roll-call ko replace karta hai."
+          english: "Traditional attendance takes 10 to 15 minutes every lecture, causing disruptions and buddy punching. SnapClass solves this with instant dual-modality AI biometrics.",
+          hinglish: "Traditional attendance 10 se 15 minute leti hai aur proxy attendance hoti hai. SnapClass AI biometrics se ise instant banata hai."
         },
         userAudioBlob: null,
-        userAudioUrl: "shivam_intro.webm"
+        userAudioUrl: null
       },
       {
         title: "2. Architecture",
