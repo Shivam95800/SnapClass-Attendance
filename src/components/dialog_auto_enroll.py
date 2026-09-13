@@ -1,6 +1,7 @@
 import streamlit as st
 from src.database.db import (
     get_subject_by_code,
+    get_subject_by_id,
     check_student_enrolled,
     enroll_student_to_subject,
     verify_session,
@@ -20,8 +21,9 @@ def auto_enroll_dialog(subject_code, session_token=None):
     student_id = student_data['student_id']
 
     # 1. Verify session TTL if a session token was embedded
+    session_data = {}
     if session_token:
-        is_valid, msg, _ = verify_session(session_token)
+        is_valid, msg, session_data = verify_session(session_token)
         if not is_valid:
             st.error(f"⚠️ **Session Expired or Invalid**: {msg}")
             if st.button('Dismiss', width='stretch'):
@@ -29,10 +31,16 @@ def auto_enroll_dialog(subject_code, session_token=None):
                 st.rerun()
             return
 
-    # 2. Find subject
-    subject = get_subject_by_code(subject_code.strip())
+    # 2. Find subject (prefer exact subject_id from session token, fallback to subject_code)
+    subject = None
+    if session_data and session_data.get("subject_id"):
+        subject = get_subject_by_id(session_data["subject_id"])
+
     if not subject:
-        st.error('Subject code not found!')
+        subject = get_subject_by_code(subject_code.strip())
+
+    if not subject:
+        st.error('Subject not found! Please contact your teacher for a fresh QR code.')
         if st.button('Close', width='stretch'):
             st.query_params.clear()
             st.rerun()

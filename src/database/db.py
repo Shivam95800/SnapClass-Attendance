@@ -181,6 +181,18 @@ def get_subject_by_code(subject_code: str):
         return None
 
 
+def get_subject_by_id(subject_id: int):
+    try:
+        client = _get_client()
+        doc = client.collection("subjects").document(str(subject_id)).get()
+        if doc.exists:
+            return doc.to_dict()
+        return None
+    except Exception as e:
+        print("get_subject_by_id error:", e)
+        return None
+
+
 # ─────────────────────────────────────────────
 # Enrollment
 # ─────────────────────────────────────────────
