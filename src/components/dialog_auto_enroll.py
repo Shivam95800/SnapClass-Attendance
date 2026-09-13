@@ -10,7 +10,14 @@ import time
 
 @st.dialog("Quick Enrollment")
 def auto_enroll_dialog(subject_code, session_token=None):
-    student_id = st.session_state.student_data['student_id']
+    student_data = st.session_state.get('student_data')
+    if not student_data or 'student_id' not in student_data:
+        st.warning("⚠️ Please complete FaceID login or register your profile first before enrolling.")
+        if st.button('Close', width='stretch'):
+            st.rerun()
+        return
+
+    student_id = student_data['student_id']
 
     # 1. Verify session TTL if a session token was embedded
     if session_token:

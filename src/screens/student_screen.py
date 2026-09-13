@@ -117,6 +117,10 @@ def student_screen():
     st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
 
     with st.container(border=True):
+        pending_join_code = st.query_params.get('join-code')
+        if pending_join_code:
+            st.info(f"📲 **Course Enrollment in Progress**: You are joining course `{pending_join_code}`. Complete your FaceID login or profile registration below to finish enrolling!")
+
         st.markdown("<h2 style='text-align: center; margin: 0 0 0.5rem 0; color: #0F172A;'>Student FaceID Login</h2>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center; color: #64748B; margin-bottom: 1.5rem;'>Position your face in the center of the camera. Anti-spoofing requires a 2-shot liveness check (Eyes Open + Blink).</p>", unsafe_allow_html=True)
 
